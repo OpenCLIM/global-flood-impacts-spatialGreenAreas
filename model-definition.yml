@@ -1,0 +1,72 @@
+kind: M
+api_version: v1beta3
+metadata:
+  display_name: Global Urban_Flooding:Extract Greenspaces
+  name: citycat-green-areas
+  publisher: Newcastle University
+  summary: CityCAT is a tool for modelling, analysis and visualisation of surface water flooding.
+  source_code: https://github.com/OpenCLIM/citycat-dafni
+  description: >
+    CityCAT (City Catchment Analysis Tool) is a unique software tool for modelling, analysis and visualisation of surface water flooding.
+    CityCAT enables rapid assessment of combined pluvial and fluvial flood risk and allows assessment of the effects of different flood alleviation measures.
+    This DAFNI model generates input data for CityCAT, runs a simulation and then converts the output data.
+    All input data is assumed to be projected in [OSGB 1936](https://epsg.io/27700).
+    The domain is generated either using a boundary polygon or a combination of centroid location and size.
+    A rainfall total can either be specified directly or extracted from FUTURE-DRAINAGE based on a return period, duration and time horizon.
+    The storm profile is generated using the FEH summer profile.
+    The effects of buildings, green areas and inflow boundary conditions can be included.
+    Results are provided in a range of formats and a metadata JSON file is created which can be used to create DAFNI datasets.
+    The CityCAT model can use greenspace polygons to determine permeability. This model accepts greenspace data in .gpkg format, clips the data to the
+    selected area, and ensures all data is in the same projection. If the file sizes are too large, multiple .gpkgs can be added directly, or zipped.
+  contact_point_name: steve birkinshaw
+  contact_point_email: s.j.birkinshaw@ncl.ac.uk
+
+spec:
+  inputs:
+    parameters:
+      - name: PERMEABLE_AREAS
+        title: Permeable areas
+        type: string
+        description:
+          If `PERMEABLE_AREAS` is set to "polygons", polygons from the `green_areas` dataslot are used to define areas which are permeable.
+          Otherwise, all cells are treated as being "permeable" or "impermeable", depending on the selection.
+        required: true
+        default: permeable
+        options:
+          - name: polygons
+            title: Polygons
+          - name: permeable
+            title: Permeable
+          - name: impermeable
+            title: Impermeable
+    dataslots:
+      - name: Boundary File
+        description:
+          A .gpkg file containing the boundary of the location of interest.
+        path: inputs/boundary/
+        required: false
+
+      - name: Green Areas file
+        description:
+          This file should be gpkg format and the location of the green areas. Spatial green_areas require a "Value" in the gpkg file and an additional infiltration.csv file
+        path: inputs/green_areas
+        required: false
+
+      - name: Parameters
+        description:
+          All input parameters and their values are stored in a csv file.
+        path: inputs/parameters/
+        required: false
+         
+        
+  outputs:
+    datasets:
+      - name: outputs/green_areas/*
+        type: folder
+        description:
+          A gpgk of green_areas data for the city of interest. If spatial green areas are used an additional infiltration.csv file is copied over.
+
+      - name: outputs/parameters/*
+        type: folder
+        description:
+          All parameters and their values are stored in a csv file.
